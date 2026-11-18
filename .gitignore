@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# R session / IDE files
+.Rhistory
+.RData
+*.RData
+.Rproj.user/
+.Ruserdata
+Rplots.pdf
+
+# Large raw input data (re-downloadable; too big for GitHub)
+*.nc
+vg250_ebenen_0101/
+
+# Not needed in the repo
+Final_data_2024.csv

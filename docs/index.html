@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Climate and Wheat Yields in Germany</title>
+<meta name="description" content="Preliminary empirical research note: a district-level panel analysis of growing-season temperature, precipitation and winter wheat yields in Germany, 2000–2024.">
+<style>
+  :root {
+    --bg: #fbfaf7;
+    --surface: #ffffff;
+    --text: #1f2328;
+    --muted: #5b6370;
+    --border: #e3e0d8;
+    --accent: #2f6b3a;
+    --accent-soft: #e8f1e9;
+    --figure-bg: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15181c;
+      --surface: #1d2126;
+      --text: #e6e8eb;
+      --muted: #a2a9b4;
+      --border: #333941;
+      --accent: #8fc79a;
+      --accent-soft: #1f2d22;
+      --figure-bg: #ffffff;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #15181c;
+    --surface: #1d2126;
+    --text: #e6e8eb;
+    --muted: #a2a9b4;
+    --border: #333941;
+    --accent: #8fc79a;
+    --accent-soft: #1f2d22;
+    --figure-bg: #ffffff;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 18px;
+    line-height: 1.65;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 16px; }
+
+  header.hero { padding: 56px 0 32px; border-bottom: 1px solid var(--border); }
+  .eyebrow {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 13px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--accent); font-weight: 600; margin: 0 0 12px;
+  }
+  h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.2; margin: 0 0 16px; font-weight: 600; }
+  .lede { color: var(--muted); margin: 0 0 24px; }
+  .btn {
+    display: inline-block; font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 15px; font-weight: 600; text-decoration: none;
+    background: var(--accent); color: var(--bg); padding: 10px 18px; border-radius: 6px;
+  }
+  .btn:hover { opacity: .9; }
+
+  .keyfacts {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px; margin: 32px 0 0;
+  }
+  .fact {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .fact b { display: block; font-size: 24px; color: var(--accent); line-height: 1.2; }
+  .fact span { font-size: 13px; color: var(--muted); }
+
+  nav.toc {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 15px;
+    padding: 20px 0; border-bottom: 1px solid var(--border);
+  }
+  nav.toc a { color: var(--muted); text-decoration: none; margin-right: 18px; white-space: nowrap; line-height: 2; }
+  nav.toc a:hover { color: var(--accent); }
+
+  main section { padding: 8px 0 16px; }
+  h2 { font-size: 26px; margin: 40px 0 12px; font-weight: 600; }
+  h3 { font-size: 20px; margin: 28px 0 8px; font-weight: 600; }
+  p { margin: 0 0 16px; }
+  a { color: var(--accent); }
+
+  .question {
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    padding: 16px 20px; border-radius: 0 6px 6px 0; font-weight: 600; margin: 0 0 16px;
+  }
+  .note {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 15px; color: var(--muted);
+  }
+
+  .equation {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 18px 16px; text-align: center; font-style: italic; font-size: 19px;
+    overflow-x: auto; margin: 0 0 16px;
+  }
+  .equation span { white-space: nowrap; }
+  dl.vars { margin: 0 0 16px; }
+  dl.vars div { display: flex; gap: 12px; padding: 4px 0; }
+  dl.vars dt { font-style: italic; min-width: 96px; flex-shrink: 0; }
+  dl.vars dd { margin: 0; }
+
+  figure { margin: 24px 0; }
+  figure img {
+    width: 100%; height: auto; display: block; background: var(--figure-bg);
+    border: 1px solid var(--border); border-radius: 8px;
+  }
+  figcaption { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; color: var(--muted); margin-top: 8px; }
+
+  .table-wrap { overflow-x: auto; margin: 16px 0 8px; }
+  table {
+    width: 100%; border-collapse: collapse; font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 15px; font-variant-numeric: tabular-nums; background: var(--surface);
+  }
+  caption { text-align: left; font-weight: 600; padding: 0 0 8px; font-size: 15px; }
+  th, td { padding: 7px 12px; border-bottom: 1px solid var(--border); text-align: right; }
+  th:first-child, td:first-child { text-align: left; }
+  thead th { border-bottom: 2px solid var(--text); }
+  tr.se td { color: var(--muted); padding-top: 0; font-size: 14px; }
+  tr.coef td { border-bottom: none; }
+  tbody tr.group td { border-top: 2px solid var(--border); }
+
+  ol.refs { padding-left: 0; list-style: none; font-size: 16px; }
+  ol.refs li { margin-bottom: 12px; padding-left: 24px; text-indent: -24px; }
+  ol.refs a { word-break: break-all; }
+
+  footer {
+    margin-top: 48px; padding: 24px 0 48px; border-top: 1px solid var(--border);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; color: var(--muted);
+  }
+
+  @media (max-width: 520px) {
+    body { font-size: 17px; }
+    header.hero { padding-top: 36px; }
+    dl.vars div { flex-direction: column; gap: 0; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Preliminary empirical research note</p>
+    <h1>Climate Conditions and Winter Wheat Yields in Germany: A District-Level Panel Analysis, 2000–2024</h1>
+    <p class="lede">How are growing-season temperature and precipitation associated with winter wheat yields across German districts, and are those relationships non-linear?</p>
+    <a class="btn" href="Climate_yield_germany.pdf">Download the full report (PDF)</a>
+
+    <div class="keyfacts">
+      <div class="fact"><b>8,148</b><span>district-year observations</span></div>
+      <div class="fact"><b>366</b><span>districts, 25 harvest years</span></div>
+      <div class="fact"><b>≈ 8.33 °C</b><span>estimated temperature turning point</span></div>
+      <div class="fact"><b>≈ 502 mm</b><span>estimated precipitation turning point</span></div>
+    </div>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="wrap">
+    <a href="#background">Background</a>
+    <a href="#data">Data</a>
+    <a href="#method">Method</a>
+    <a href="#findings">Findings</a>
+    <a href="#sensitivity">Sensitivity</a>
+    <a href="#limitations">Limitations</a>
+    <a href="#future">Future research</a>
+    <a href="#references">References</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<section id="background">
+  <h2>1. Background and research motivation</h2>
+  <p>Climate change presents significant challenges to agricultural productivity and farm-level economic stability. Agricultural production is particularly sensitive to changing temperature and precipitation patterns, with impacts varying across crops, geographical regions, and farming systems (Carter et al., 2018). Previous research has demonstrated that climate-related yield responses can be nonlinear and vary considerably across European agricultural regions. In particular, Pirttioja et al. (2015) examined temperature and precipitation effects on wheat yields across a European transect, including Germany, highlighting the importance of considering interactions between climatic conditions and crop responses. Similarly, Reidsma et al. (2009) emphasises the role of farm-level adaptation and regional differences in shaping agricultural vulnerability to climate variability.</p>
+  <p>Understanding these relationships is an important first step towards assessing the economic implications of climate change for agricultural systems. Beyond average crop yields, climate resilience also concerns the stability of farm production, production costs, and farm income. These dimensions are increasingly relevant to the assessment of climate-resilient agriculture in Europe (European Environment Agency, 2026).</p>
+  <p>Against this background, this preliminary analysis examines the relationship between growing-season temperature, precipitation and winter wheat yields across German districts from 2000 to 2024. It provides an initial empirical foundation for further research linking climate and agronomic indicators with farm-level economic performance and financial risk.</p>
+
+  <h2>2. Research question</h2>
+  <p class="question">How are growing-season temperature and precipitation associated with winter wheat yields across German districts?</p>
+  <p>The analysis focuses on two climate variables and explores whether their relationships with yields are nonlinear.</p>
+</section>
+
+<section id="data">
+  <h2>3. Data and variables</h2>
+  <p>The analysis combines two datasets.</p>
+
+  <h3>Agricultural data</h3>
+  <p>District-level crop area and yield data for Germany, covering 1979–2024, were used to construct a winter wheat yield panel for the period 2000–2024. The dataset covers 397 districts and includes 11 crop categories. Winter wheat yields are measured in tonnes per hectare.</p>
+  <p>The agricultural dataset is based on the updated district-level dataset by Offermann and Duden (2025), building on the methodology described in Duden et al. (2024).</p>
+
+  <h3>Climate data</h3>
+  <p>Monthly temperature and precipitation data were obtained from the German Meteorological Service (Deutscher Wetterdienst, DWD), using the HYRAS-DE gridded climate datasets, version 6-1 (DWD, 2025a, 2025b). These datasets provide climate information at approximately 1 km spatial resolution.</p>
+  <p>Growing-season climate exposure was defined from October of the previous calendar year to July of the harvest year. For example, the 2020 winter wheat harvest year includes climate data from October 2019 to July 2020.</p>
+  <ul>
+    <li><strong>Temperature:</strong> day-weighted mean of monthly mean temperatures (°C).</li>
+    <li><strong>Precipitation:</strong> sum of monthly precipitation totals (mm).</li>
+  </ul>
+  <p>Climate values were aggregated to district level using area-weighted spatial extraction.</p>
+  <p>The two datasets were linked using district identifiers and harvest year. The resulting analytical sample contains <strong>8,148 district-year observations across 366 districts and 25 years</strong>.</p>
+</section>
+
+<section id="method">
+  <h2>4. Empirical methodology</h2>
+
+  <h3>4.1 Empirical approach</h3>
+  <p>To examine the relationship between growing-season climate conditions and winter wheat yields, I employ a panel fixed-effects regression approach. The analysis uses district-level observations for the period 2000–2024.</p>
+  <p>The empirical strategy exploits variation in temperature and precipitation within districts over time, while controlling for unobserved characteristics that remain relatively constant within each district and common year-specific factors affecting all districts. District fixed effects account for time-invariant differences across districts, while year fixed effects capture common annual shocks and trends.</p>
+
+  <h3>4.2 Model specification</h3>
+  <p>The main empirical specification is:</p>
+  <div class="equation" role="math" aria-label="Yield sub i t equals beta 1 times Temp centred plus beta 2 times Temp centred squared plus beta 3 times Prec centred plus beta 4 times Prec centred squared plus alpha i plus lambda t plus epsilon i t">
+    <span>Yield<sub>it</sub> = β<sub>1</sub>Temp<sup>c</sup><sub>it</sub> + β<sub>2</sub>(Temp<sup>c</sup><sub>it</sub>)<sup>2</sup></span>
+    <span>+ β<sub>3</sub>Prec<sup>c</sup><sub>it</sub> + β<sub>4</sub>(Prec<sup>c</sup><sub>it</sub>)<sup>2</sup></span>
+    <span>+ α<sub>i</sub> + λ<sub>t</sub> + ε<sub>it</sub></span>
+  </div>
+  <p>Where:</p>
+  <dl class="vars">
+    <div><dt>Yield<sub>it</sub></dt><dd>winter wheat yield (tonnes per hectare) in district <i>i</i> and year <i>t</i></dd></div>
+    <div><dt>Temp<sup>c</sup><sub>it</sub></dt><dd>mean-centred growing-season temperature</dd></div>
+    <div><dt>Prec<sup>c</sup><sub>it</sub></dt><dd>mean-centred growing-season precipitation, expressed in units of 100 mm</dd></div>
+    <div><dt>α<sub>i</sub></dt><dd>district fixed effects</dd></div>
+    <div><dt>λ<sub>t</sub></dt><dd>year fixed effects</dd></div>
+    <div><dt>ε<sub>it</sub></dt><dd>error term</dd></div>
+  </dl>
+  <p>Mean-centring temperature and precipitation before including their squared terms helps make the coefficients of the linear terms easier to interpret. The quadratic terms allow the estimated relationships to change direction across different climate conditions.</p>
+
+  <h3>4.3 Estimation and statistical inference</h3>
+  <p>The regression models are estimated using ordinary least squares (OLS) with district and year fixed effects. District fixed effects account for time-invariant differences across districts, while year fixed effects control for common shocks and changes affecting all districts in a given year.</p>
+  <p>Standard errors are clustered at the district level to account for potential correlation in the error terms within districts over time. This approach allows observations from the same district across different years to have correlated errors.</p>
+  <p>To assess the overall relevance of the climate variables, a joint Wald test is conducted. The linear and quadratic terms for temperature and precipitation are tested jointly. The models are also compared using adjusted R-squared, within R-squared and root mean squared error (RMSE).</p>
+
+  <h3>4.4 Sensitivity analysis</h3>
+  <p>To assess the robustness of the results, a sensitivity analysis is conducted by excluding observations in the top 1% of the precipitation distribution. This provides a check on whether the estimated climate-yield relationships are disproportionately influenced by exceptionally wet district-year observations.</p>
+  <p>The quadratic fixed-effects model is re-estimated using the restricted sample and compared with the baseline model. The signs and statistical significance of the estimated coefficients remain broadly consistent. However, the magnitude of the squared precipitation coefficient increases in absolute terms, suggesting that the estimated curvature of the precipitation-yield relationship is somewhat sensitive to the wettest observations.</p>
+</section>
+
+<section id="findings">
+  <h2>5. Preliminary findings</h2>
+
+  <h3>5.1 Regression results</h3>
+  <p>Table 1 presents the results of the linear and quadratic fixed-effects regression models examining the association between growing-season climate conditions and winter wheat yields across German districts. Both specifications include district and year fixed effects, with standard errors clustered at the district level.</p>
+  <p>The linear model serves as a baseline specification, while the quadratic model allows for potential non-linear relationships by including squared temperature and precipitation terms. The quadratic specification shows a modest improvement in model fit, with adjusted R-squared increasing from 0.7229 to 0.7325 and RMSE decreasing from 0.5988 to 0.5883. The within R-squared also increases from 0.0218 to 0.0560.</p>
+  <p>In the quadratic model, both squared climate terms are negative and statistically significant at the 1% level, suggesting non-linear associations between growing-season temperature, precipitation and winter wheat yields.</p>
+
+  <div class="table-wrap">
+    <table>
+      <caption>Table 1: Fixed-effects regression results. Dependent variable: winter wheat yield (tonnes/ha).</caption>
+      <thead>
+        <tr><th scope="col">Variables</th><th scope="col">Model 1: Linear</th><th scope="col">Model 2: Quadratic</th></tr>
+      </thead>
+      <tbody>
+        <tr class="coef"><td>temperature</td><td>0.047</td><td></td></tr>
+        <tr class="se"><td></td><td>(0.036)</td><td></td></tr>
+        <tr class="coef"><td>precipitation_100</td><td>−0.137***</td><td></td></tr>
+        <tr class="se"><td></td><td>(0.012)</td><td></td></tr>
+        <tr class="coef"><td>temperature_c</td><td></td><td>0.001</td></tr>
+        <tr class="se"><td></td><td></td><td>(0.035)</td></tr>
+        <tr class="coef"><td>I(temperature_c^2)</td><td></td><td>−0.065***</td></tr>
+        <tr class="se"><td></td><td></td><td>(0.008)</td></tr>
+        <tr class="coef"><td>precipitation_c</td><td></td><td>−0.071***</td></tr>
+        <tr class="se"><td></td><td></td><td>(0.012)</td></tr>
+        <tr class="coef"><td>I(precipitation_c^2)</td><td></td><td>−0.024***</td></tr>
+        <tr class="se"><td></td><td></td><td>(0.003)</td></tr>
+        <tr class="group"><td>Num. obs.</td><td>8148</td><td>8148</td></tr>
+        <tr><td>R²</td><td>0.736</td><td>0.745</td></tr>
+        <tr><td>R² adj.</td><td>0.723</td><td>0.732</td></tr>
+        <tr><td>R² within</td><td>0.022</td><td>0.056</td></tr>
+        <tr><td>R² within adj.</td><td>0.022</td><td>0.055</td></tr>
+        <tr><td>AIC</td><td>15550.1</td><td>15264.6</td></tr>
+        <tr><td>BIC</td><td>18296.2</td><td>18024.8</td></tr>
+        <tr><td>RMSE</td><td>0.60</td><td>0.59</td></tr>
+        <tr><td>Std. errors</td><td>by: district_no</td><td>by: district_no</td></tr>
+        <tr><td>FE: district_no</td><td>X</td><td>X</td></tr>
+        <tr><td>FE: year</td><td>X</td><td>X</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">Note: The dependent variable is winter wheat yield, measured in tonnes per hectare. Standard errors clustered at the district level are reported in parentheses. Both models include district and year fixed effects. * p &lt; 0.10, ** p &lt; 0.05, *** p &lt; 0.01.</p>
+
+  <h3>5.2 Temperature and winter wheat yields</h3>
+  <p>The quadratic specification reveals a non-linear association between growing-season temperature and winter wheat yields. The squared temperature coefficient is negative and statistically significant (−0.0647, p &lt; 0.01), indicating an inverted-U-shaped relationship. In contrast, the linear temperature coefficient is close to zero and statistically insignificant (0.0014, p = 0.967).</p>
+  <p>The estimated marginal association varies across temperature levels, as illustrated in Figure 1. At lower temperatures, an increase in temperature is positively associated with winter wheat yields, whereas at higher temperatures, the association becomes negative. The estimated turning point of the quadratic relationship is approximately 8.33 °C.</p>
+  <figure>
+    <img src="figures/fig1_temperature_yield.png" width="1097" height="708" alt="Inverted-U curve of estimated yield association against growing-season mean temperature from 4 to 12 °C, peaking at about 8.3 °C and falling to roughly −1.1 t/ha at 4 °C and −0.9 t/ha at 12 °C.">
+    <figcaption>Figure 1: Estimated partial association between growing-season temperature and winter wheat yields (precipitation held at its mean).</figcaption>
+  </figure>
+  <p>These findings suggest that the association between growing-season temperature and winter wheat yields depends on the prevailing temperature level. However, the estimates represent district-level observational associations and should not be interpreted as causal effects or as identifying an agronomic temperature optimum.</p>
+
+  <h3>5.3 Precipitation and winter wheat yields</h3>
+  <p>The quadratic specification also indicates a non-linear association between growing-season precipitation and winter wheat yields. Both the linear precipitation coefficient (−0.0712) and the squared precipitation coefficient (−0.0241) are negative and statistically significant at the 1% level. This suggests that the estimated association between precipitation and winter wheat yields becomes increasingly negative as precipitation increases.</p>
+  <p>The estimated turning point of the quadratic relationship is approximately 502 mm of growing-season precipitation. Below this level, the model indicates a slightly positive marginal association between precipitation and yields. Above this level, the estimated marginal association becomes negative and increasingly pronounced. For example, an additional 100 mm of precipitation is associated with an estimated yield change of approximately −0.047 tonnes per hectare at 600 mm and −0.144 tonnes per hectare at 800 mm, holding the other climate variable constant.</p>
+  <figure>
+    <img src="figures/fig2_precipitation_yield.png" width="1097" height="708" alt="Curve of estimated yield association against growing-season precipitation from about 300 to 1,700 mm, near zero up to about 500 mm and then declining steeply to roughly −3.3 t/ha at 1,700 mm.">
+    <figcaption>Figure 2: Estimated association between growing-season precipitation and winter wheat yields (temperature held at its mean).</figcaption>
+  </figure>
+  <p>These results suggest that the relationship between precipitation and winter wheat yields depends on the amount of precipitation received during the growing season. However, the estimated turning point should not be interpreted as an agronomic optimum or a universal threshold. The analysis captures district-level observational associations and does not establish a causal effect of precipitation on yields.</p>
+</section>
+
+<section id="sensitivity">
+  <h3>5.4 Sensitivity analysis</h3>
+  <p>To assess the robustness of the main findings, a sensitivity analysis was conducted by excluding observations with growing-season precipitation above the 99th percentile of the precipitation distribution. This removed 82 observations from the original sample of 8,148, leaving 8,066 observations.</p>
+  <p>The results of the restricted-sample regression are broadly consistent with the main specification. The estimated temperature coefficients retain their signs and statistical significance patterns. Similarly, both precipitation coefficients remain negative and statistically significant at the 1% level. However, the coefficient of the squared precipitation term becomes more negative, indicating a stronger estimated curvature after excluding the wettest observations.</p>
+  <p>Overall, the sensitivity analysis suggests that the main findings regarding the non-linear associations between climate variables and winter wheat yields are not driven entirely by the wettest 1% of observations. Nevertheless, the change in the estimated precipitation curvature indicates that the precise shape of this relationship is somewhat sensitive to extreme precipitation values.</p>
+
+  <div class="table-wrap">
+    <table>
+      <caption>Table 2: Sensitivity analysis — excluding the wettest 1% of precipitation observations.</caption>
+      <thead>
+        <tr><th scope="col">Variables</th><th scope="col">Original model</th><th scope="col">Restricted sample</th></tr>
+      </thead>
+      <tbody>
+        <tr class="coef"><td>Temperature (centred)</td><td>0.001</td><td>0.004</td></tr>
+        <tr class="se"><td></td><td>(0.035)</td><td>(0.034)</td></tr>
+        <tr class="coef"><td>Temperature² (centred)</td><td>−0.065***</td><td>−0.063***</td></tr>
+        <tr class="se"><td></td><td>(0.008)</td><td>(0.008)</td></tr>
+        <tr class="coef"><td>Precipitation (centred)</td><td>−0.071***</td><td>−0.069***</td></tr>
+        <tr class="se"><td></td><td>(0.012)</td><td>(0.012)</td></tr>
+        <tr class="coef"><td>Precipitation² (centred)</td><td>−0.024***</td><td>−0.040***</td></tr>
+        <tr class="se"><td></td><td>(0.003)</td><td>(0.003)</td></tr>
+        <tr class="group"><td>District fixed effects</td><td>Yes</td><td>Yes</td></tr>
+        <tr><td>Year fixed effects</td><td>Yes</td><td>Yes</td></tr>
+        <tr><td>Within R²</td><td>0.0560</td><td>0.0656</td></tr>
+        <tr><td>RMSE</td><td>0.5883</td><td>0.5827</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">Note: The dependent variable is winter wheat yield, measured in tonnes per hectare. The restricted sample excludes observations above the 99th percentile of growing-season precipitation. Standard errors clustered at the district level are reported in parentheses. Both models include district and year fixed effects. *** p &lt; 0.001.</p>
+</section>
+
+<section id="limitations">
+  <h2>6. Discussion</h2>
+  <h3>6.1 Limitations</h3>
+  <p>Several limitations should be considered when interpreting the results of this preliminary analysis.</p>
+  <p>First, the analysis is based on district-level agricultural and climate data. Although this provides broad geographical coverage across Germany, it does not capture differences between individual farms, soil conditions, farm management practices or field-level characteristics. Consequently, the estimated relationships may conceal substantial variation between farms within the same district.</p>
+  <p>Second, the analysis focuses exclusively on growing-season temperature and precipitation. Other factors that influence winter wheat yields, including soil properties, water availability, extreme weather events and agricultural management practices are not explicitly considered. Furthermore, the growing season is defined as October of the previous year to July of the harvest year. This provides a consistent period for the analysis but may not fully capture differences in crop development and climate sensitivity across regions.</p>
+  <p>Third, the empirical approach identifies observational associations rather than causal effects. Although district and year fixed effects account for time-invariant differences between districts and common annual shocks, other time-varying factors may still influence the relationship between climate conditions and crop yields.</p>
+  <p>Finally, the analysis focuses on winter wheat and does not directly examine crop rotation diversity, soil health, farm profitability or financial risk. Therefore, the results provide an initial assessment of climate–yield relationships rather than a comprehensive evaluation of climate-resilient agricultural systems.</p>
+</section>
+
+<section id="future">
+  <h3>6.2 Future research</h3>
+  <p>Future research could extend this analysis by incorporating additional agronomic, environmental and economic indicators to better understand the relationship between climate-resilient agricultural practices and farm performance.</p>
+  <p>First, the analysis could be extended to other major crops, allowing comparisons of climate sensitivity across different cropping systems. Information on crop rotation patterns and crop diversity could also help investigate whether diversified rotations are associated with greater yield stability under varying climatic conditions.</p>
+  <p>Second, incorporating soil-related indicators, such as soil organic carbon, soil moisture and soil health measures, could provide further insights into the role of soil conditions in supporting climate resilience. Satellite-based indicators could complement existing agricultural and climate datasets by providing additional information on vegetation conditions and crop development.</p>
+  <p>Third, linking agronomic indicators with farm-level economic data would allow an assessment of how climate variability translates into changes in production costs, gross margins, farm income and income stability. This would provide a stronger basis for examining the economic benefits and potential risks associated with climate-resilient agricultural practices.</p>
+  <p>Finally, these economic indicators could be used to explore the implications of agricultural climate resilience for financial institutions. In particular, greater yield and income stability may be relevant when assessing agricultural lending risks and developing financial products that support the adoption of sustainable farming practices.</p>
+</section>
+
+<section id="references">
+  <h2>References</h2>
+  <ol class="refs">
+    <li>Carter, C., Cui, X., Ghanem, D., &amp; Mérel, P. (2018). Identifying the economic impacts of climate change on agriculture. <i>Annual Review of Resource Economics, 10</i>, 361–380. <a href="https://doi.org/10.1146/annurev-resource-100517-022938">https://doi.org/10.1146/annurev-resource-100517-022938</a></li>
+    <li>Deutscher Wetterdienst. (2025a). <i>Raster data set of mean temperature in °C for Germany – HYRAS-DE-TAS v6-1</i> [Dataset]. Climate Data Center. <a href="https://opendata.dwd.de/climate_environment/CDC/grids_germany/monthly/hyras_de/air_temperature_mean/">https://opendata.dwd.de/climate_environment/CDC/grids_germany/monthly/hyras_de/air_temperature_mean/</a></li>
+    <li>Deutscher Wetterdienst. (2025b). <i>Raster data set precipitation sums in mm for Germany – HYRAS-DE-PR v6-1</i> [Dataset]. Climate Data Center. <a href="https://opendata.dwd.de/climate_environment/CDC/grids_germany/monthly/hyras_de/precipitation/">https://opendata.dwd.de/climate_environment/CDC/grids_germany/monthly/hyras_de/precipitation/</a></li>
+    <li>Duden, C., Nacke, C., &amp; Offermann, F. (2024). German yield and area data for 11 crops from 1979 to 2021 at a harmonized spatial resolution of 397 districts. <i>Scientific Data, 11</i>, Article 95. <a href="https://doi.org/10.1038/s41597-024-02951-8">https://doi.org/10.1038/s41597-024-02951-8</a></li>
+    <li>European Environment Agency. (2026). <i>Climate resilience in Europe, 2025: Progress and challenges</i> (EEA Report 03/2026). <a href="https://doi.org/10.2800/5228240">https://doi.org/10.2800/5228240</a></li>
+    <li>Offermann, F., &amp; Duden, C. (2025). <i>Crop yields and area in Germany at a harmonized district-level from 1979: Update to 2024</i> [Data publication]. OpenAgrar. <a href="https://doi.org/10.3220/253-2025-244">https://doi.org/10.3220/253-2025-244</a></li>
+    <li>Pirttioja, N., Carter, T. R., Fronzek, S., Bindi, M., Hoffmann, H., Palosuo, T., Ruiz-Ramos, M., Tao, F., Trnka, M., Acutis, M., Cammarano, D., Baranowski, P., Basso, B., Bodin, P., Buis, S., Wallach, D., Deligios, P., Gaiser, T., Ferrise, L., Rötter, R. P. (2015). Temperature and precipitation effects on wheat yield across a European transect: A crop model ensemble analysis using impact response surfaces. <i>Climate Research, 65</i>, 87–105. <a href="https://doi.org/10.3354/cr01322">https://doi.org/10.3354/cr01322</a></li>
+    <li>Reidsma, P., Ewert, F., Oude Lansink, A., &amp; Leemans, R. (2009). Vulnerability and adaptation of European farmers: A multi-level analysis of yield and income responses to climate variability. <i>Regional Environmental Change, 9</i>, 25–40. <a href="https://doi.org/10.1007/s10113-008-0059-3">https://doi.org/10.1007/s10113-008-0059-3</a></li>
+  </ol>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    Preliminary empirical research note · Analysis code: <a href="https://github.com/anushree-bh/climate-yield-germany-report">github.com/anushree-bh/climate-yield-germany-report</a>
+  </div>
+</footer>
+
+</body>
+</html>
